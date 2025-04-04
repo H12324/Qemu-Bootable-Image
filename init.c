@@ -1,18 +1,3 @@
-/* Alternative init without the shell
-#include <iostream>
-#include <unistd.h>
-#include <sys/reboot.h>
-#include <sys/syscall.h>
-
-int main() {
-    std::cout << "hello world" << std::endl;
-    //while (true) {
-        sync();
-    //}
-    reboot(RB_POWER_OFF);  
-    return 0;
-}*/
-
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/mount.h>

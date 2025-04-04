@@ -37,37 +37,23 @@ mkdir -p "$INITRAMFS_DIR"/{bin,sbin,etc,proc,sys,dev}
 
 # Create init script (Assumes user has gcc and all needed dependencies)
 cat > temp.c << EOF
-#include <stdio.h>
+#include <iostream>
 #include <unistd.h>
-#include <sys/mount.h>
-#include <stdlib.h>
 #include <sys/reboot.h>
 #include <sys/syscall.h>
 
 int main() {
-    // Not strictly necessary but makes shell more full-featured
-    mount("proc", "/proc", "proc", 0, NULL);
-    mount("sysfs", "/sys", "sysfs", 0, NULL);
-    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-
-    printf("hello world\n");
-
-    // Also optional though will panic afterwards without it
-    execl("/bin/sh", "sh", NULL);
-    perror("execl failed");
+    std::cout << "hello world" << std::endl;
+    // Comment out loop if you want it to shutdown
+    while (true) {
+        sync();
+    }
+    reboot(RB_POWER_OFF);  
     return 0;
 }
 EOF
-gcc -static -o "$INITRAMFS_DIR"/init temp.c 
+g++ -static -o "$INITRAMFS_DIR"/init temp.c 
 rm temp.c
-
-# Assumes that busybox is already on the host_device
-# Add BusyBox for a shell program 
-# Note: If busybox not installed can use run_all_no_shell.sh to skip shell entirely
-cp /bin/busybox "$INITRAMFS_DIR/bin/"
-for cmd in sh ls mount echo cat; do
-    ln -s /bin/busybox "$INITRAMFS_DIR/bin/$cmd"
-done
 
 # Create initramfs image
 (cd "$INITRAMFS_DIR" && find . | cpio -o -H newc) | gzip > "$INITRAMFS_IMG"
