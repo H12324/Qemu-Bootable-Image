@@ -12,3 +12,9 @@ Reccomended order if running seperately
 - run_qemu.sh
 
 If the busybox portion of the script is not working or if you wish to run it without the extra shell utilities and have it hang forever after printing 'hello world', use **run_all_no_shell.sh**
+
+Following commands may be useful in alleviating errors that may arise:
+```
+sudo apt install -y build-essential flex bison libssl-dev libelf-dev bc dwarves pahole 
+sudo apt install - y qemu-system-x86 busybox
+```
