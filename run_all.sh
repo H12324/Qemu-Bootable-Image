@@ -36,30 +36,16 @@ rm -rf "$INITRAMFS_DIR"
 mkdir -p "$INITRAMFS_DIR"/{bin,sbin,etc,proc,sys,dev}
 
 # Create init script (Assumes user has gcc and all needed dependencies)
-cat > temp.c << EOF
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/mount.h>
-#include <stdlib.h>
-#include <sys/reboot.h>
-#include <sys/syscall.h>
+cat > "$INITRAMFS_DIR"/init << EOF
+#!/bin/sh
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
 
-int main() {
-    // Not strictly necessary but makes shell more full-featured
-    mount("proc", "/proc", "proc", 0, NULL);
-    mount("sysfs", "/sys", "sysfs", 0, NULL);
-    mount("devtmpfs", "/dev", "devtmpfs", 0, NULL);
-
-    printf("hello world\n");
-
-    // Also optional though will panic afterwards without it
-    execl("/bin/sh", "sh", NULL);
-    perror("execl failed");
-    return 0;
-}
+echo "hello world"
+exec /bin/sh
 EOF
-gcc -static -o "$INITRAMFS_DIR"/init temp.c 
-rm temp.c
+chmod +x "$INITRAMFS_DIR/init"
 
 # Assumes that busybox is already on the host_device
 # Add BusyBox for a shell program 
